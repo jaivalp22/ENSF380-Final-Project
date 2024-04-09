@@ -1,15 +1,22 @@
 /** 
  * @author Jaival Patel <a href="mailto:jaival.patel@ucalgary.ca">
  * jaival.patel@ucalgary.ca</a>
- * @version 1.0
+ * @version 1.2
  * @since 1.0
 */
 
 package edu.ucalgary.oop;
 
 import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
 
 
@@ -25,6 +32,7 @@ public class DisasterVictim {
     private Supply[] personalBelongings;
     private final String ENTRY_DATE;
     private String gender;
+    private static ArrayList<String> genderoptions = GenderOptionsfile();
     private String comments;
     private String[] DietRestrictions;
     enum DietMealTypes{
@@ -103,6 +111,13 @@ public class DisasterVictim {
         return gender;
     }
 
+    public static List<String> getGenderOptions() {
+        if (genderoptions == null) {
+            genderoptions = GenderOptionsfiles();
+        }
+        return genderoptions;
+    }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -153,10 +168,26 @@ public class DisasterVictim {
     }
 
     public void setGender(String gender) {
-        if (!gender.matches("(?i)^(male|female|other)$")) {
-            throw new IllegalArgumentException("Invalid gender. Acceptable values are male, female, or other.");
+        List<String> genderOptions = GenderOptionsLoader.getGenderOptions();
+        if (!genderOptions.contains(gender.toLowerCase())) {
+            throw new IllegalArgumentException("Invalid gender. Acceptable values are: " + genderOptions);
         }
         this.gender = gender.toLowerCase();
+    }
+    
+
+    public static ArrayList<String> GenderOptionsfiles() {
+        ArrayList<String> options = new ArrayList<>();
+        String filename = "edu/ucalgary/oop/GenderOptions.txt";
+        try (Scanner scan = new Scanner(new BufferedReader(new FileReader(filename)))) {
+            while (scan.hasNextLine()) {
+                options.add(scan.nextLine());
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading gender options from file: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return options;
     }
    
     public void addPersonalBelonging(Supply supply) {
@@ -234,7 +265,33 @@ public class DisasterVictim {
         medicalRecords.add(record);
     }
 
-    public static void DietRestrictions(String restrictions) {} // finish later
+    public void RestrictionDescription(){
+		for (String restriction : this.DietRestrictions) {
+            Meals(DietMealTypes.valueOf(restriction));
+        }
+	}
+
+	public String[] getDietaryRestrictions() {
+		return this.DietRestrictions;
+	}
+
+    /**
+     * @param Restrictions
+     */
+    public void setDietaryRestrictions(String[] Restrictions) {
+
+        Set<DietMealTypes> Meal_Restrictions = new HashSet<>();
+        Collections.addAll(Meal_Restrictions, DietMealTypes.values());
+        
+
+        for (String restriction : Restrictions) {
+            if (!Meal_Restrictions.contains(restriction)) {
+                throw new IllegalArgumentException("This dietary restriction does not exist: " + restriction);
+            }
+        }
+
+        this.DietRestrictions = Restrictions;
+    }
 
     public static void Meals(DietMealTypes Mplan) {     
 
