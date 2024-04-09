@@ -1,7 +1,7 @@
 /** 
  * @author Jaival Patel <a href="mailto:jaival.patel@ucalgary.ca">
  * jaival.patel@ucalgary.ca</a>
- * @version 1.2
+ * @version 1.3
  * @since 1.0
 */
 
@@ -10,6 +10,7 @@ package edu.ucalgary.oop;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Vector;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,13 +27,13 @@ public class DisasterVictim {
     private String lastName;
     private String dateOfBirth;
     private int age;
-    private final int ASSIGNED_SOCIAL_ID;
-    private ArrayList<FamilyRelation> familyConnections = new ArrayList<>();
-    private ArrayList<MedicalRecord> medicalRecords = new ArrayList<>();
-    private Supply[] personalBelongings;
     private final String ENTRY_DATE;
+    private final int ASSIGNED_SOCIAL_ID;
+    private HashSet<FamilyRelation> familyConnections = new HashSet<>();
+    private Vector<MedicalRecord> medicalRecords = new Vector<>();
+    private HashSet<Supply> personalBelongings = new HashSet<>();
     private String gender;
-    private static ArrayList<String> genderoptions = GenderOptionsfile();
+    private static ArrayList<String> genderoptions = GenderOptionsfiles();
     private String comments;
     private String[] DietRestrictions;
     enum DietMealTypes{
@@ -54,6 +55,9 @@ public class DisasterVictim {
     }
 
     public DisasterVictim(String firstName, String ENTRY_DATE) {
+        if (firstName == null || firstName.isEmpty()) {
+            throw new IllegalArgumentException("First name is empty");
+        }
         this.firstName = firstName;
         if (!isValidDateFormat(ENTRY_DATE)) {
             throw new IllegalArgumentException("Invalid date format for entry date. Expected format: YYYY-MM-DD");
@@ -68,47 +72,47 @@ public class DisasterVictim {
     }
 
     public String getFirstName() {
-        return firstName;
+        return this.firstName;
     }
 
     public String getLastName() {
-        return lastName;
+        return this.lastName;
     }
 
     public String getDateOfBirth() {
-        return dateOfBirth;
+        return this.dateOfBirth;
     }
 
     public int getAge() {
-        return age;
+        return this.age;
     }
 
     public int getAssignedSocialID() {
-        return ASSIGNED_SOCIAL_ID;
+        return this.ASSIGNED_SOCIAL_ID;
     }
 
-  public FamilyRelation[] getFamilyConnections() {
-        return familyConnections.toArray(new FamilyRelation[0]);
+  public HashSet<FamilyRelation> getFamilyConnections() {
+        return this.familyConnections;
     }
 
-    public MedicalRecord[] getMedicalRecords() {
-        return medicalRecords.toArray(new MedicalRecord[0]);
+    public Vector<MedicalRecord> getMedicalRecords() {
+        return this.medicalRecords;
     }
 
-    public Supply[] getPersonalBelongings() {
+    public HashSet<Supply> getPersonalBelongings() {
         return this.personalBelongings;
     }
 
     public String getEntryDate() {
-        return ENTRY_DATE;
+        return this.ENTRY_DATE;
     }
 
     public String getComments() {
-        return comments;
+        return this.comments;
     }
 
     public String getGender() {
-        return gender;
+        return this.gender;
     }
 
     public static List<String> getGenderOptions() {
@@ -145,22 +149,25 @@ public class DisasterVictim {
         this.age = 0;
     }
 
-    public void setFamilyConnections(FamilyRelation[] connections) {
+    public void setFamilyConnections(HashSet<FamilyRelation> connections) {
         this.familyConnections.clear();
         for (FamilyRelation newRecord : connections) {
             addFamilyConnection(newRecord);
         }
     }
 
-    public void setMedicalRecords(MedicalRecord[] records) {
-        this.medicalRecords.clear();
-        for (MedicalRecord newRecord : records) {
-            addMedicalRecord(newRecord);
+    public void setMedicalRecords(Vector<MedicalRecord> medicalRecord) {
+        if (!this.medicalRecords.isEmpty()) {
+            this.medicalRecords.clear();
         }
+        this.medicalRecords = medicalRecord;
     }
-
-    public void setPersonalBelongings(Supply[] belongings) {
-        this.personalBelongings = belongings;
+    
+    public void setPersonalBelongings(HashSet<Supply> belongings) {
+        if (!this.personalBelongings.isEmpty()) {
+            this.personalBelongings.clear();
+        }
+        personalBelongings.forEach(this::addPersonalBelonging);
     }
 
     public void setComments(String comments) {
@@ -168,9 +175,8 @@ public class DisasterVictim {
     }
 
     public void setGender(String gender) {
-        List<String> genderOptions = GenderOptionsLoader.getGenderOptions();
-        if (!genderOptions.contains(gender.toLowerCase())) {
-            throw new IllegalArgumentException("Invalid gender. Acceptable values are: " + genderOptions);
+        if (!genderoptions.contains(gender.toLowerCase())) {
+            throw new IllegalArgumentException("Invalid gender. Acceptable values are: " + this.genderoptions);
         }
         this.gender = gender.toLowerCase();
     }
@@ -265,7 +271,7 @@ public class DisasterVictim {
         medicalRecords.add(record);
     }
 
-    public void RestrictionDescription(){
+    public void RestrictionDesc(){
 		for (String restriction : this.DietRestrictions) {
             Meals(DietMealTypes.valueOf(restriction));
         }
