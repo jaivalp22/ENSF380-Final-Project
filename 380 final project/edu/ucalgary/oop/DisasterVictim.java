@@ -26,6 +26,19 @@ public class DisasterVictim {
     private final String ENTRY_DATE;
     private String gender;
     private String comments;
+    private String[] DietRestrictions;
+    enum DietMealTypes{
+        AVML,
+        DBML,
+        GFML,
+        KSML,
+        LSML,
+        MOML,
+        PFML,
+        VGML,
+        VJML
+
+    }
 
     private static int generateSocialID() {
         counter++;
@@ -219,5 +232,41 @@ public class DisasterVictim {
     
     public void addMedicalRecord(MedicalRecord record) {
         medicalRecords.add(record);
+    }
+
+    public static void DietRestrictions(String restrictions) {} // finish later
+
+    public static void Meals(DietMealTypes Mplan) {     
+
+        switch(Mplan) {
+            case AVML:
+                System.out.println(Mplan + "Asian vegetarian meal");
+                break;
+            case DBML:
+                System.out.println(Mplan + "Diabetic meal");
+                break;
+            case GFML: 
+                System.out.println(Mplan + "Gluten intolerant meal");
+                break;
+            case KSML:
+                System.out.println(Mplan + "Kosher meal");
+                break;
+            case LSML:
+                System.out.println(Mplan + "Low salt meal");
+                break;
+            case MOML:
+                System.out.println(Mplan + "Muslim meal");
+                break;
+            case PFML:
+                System.out.println(Mplan + "Peanut-free meal");
+                break;
+            case VGML:
+                System.out.println(Mplan + "Vegan meal");
+                break;
+            case VJML:
+                System.out.println(Mplan + "Vegetarian Jain meal");
+                break;
+
+        }
     }
 }
