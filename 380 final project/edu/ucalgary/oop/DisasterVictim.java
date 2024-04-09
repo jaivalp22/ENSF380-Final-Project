@@ -1,7 +1,7 @@
 /** 
  * @author Jaival Patel <a href="mailto:jaival.patel@ucalgary.ca">
  * jaival.patel@ucalgary.ca</a>
- * @version 1.3
+ * @version 1.4
  * @since 1.0
 */
 
@@ -163,7 +163,7 @@ public class DisasterVictim {
         this.medicalRecords = medicalRecord;
     }
     
-    public void setPersonalBelongings(HashSet<Supply> belongings) {
+    public void setPersonalBelongings(Supply[] updatedBelongings) {
         if (!this.personalBelongings.isEmpty()) {
             this.personalBelongings.clear();
         }
@@ -197,74 +197,140 @@ public class DisasterVictim {
     }
    
     public void addPersonalBelonging(Supply supply) {
-
-        location.removeSupply(supply);
-
-        if (this.personalBelongings == null) {
-            Supply tmpSupply[] = {supply};
-            this.setPersonalBelongings(tmpSupply);
-            return;
-        }
-
-        int newLength = this.personalBelongings.length + 1;
-        Supply tmpPersonalBelongings[] = new Supply[newLength];
-
-        int i;
-        for (i=0; i < personalBelongings.length; i++) {
-            tmpPersonalBelongings[i] = this.personalBelongings[i];
-        }
-
-        tmpPersonalBelongings[i] = supply;
-
-        this.personalBelongings = tmpPersonalBelongings;
-    }
-
-    public void removePersonalBelonging(Supply unwantedSupply) {
-        Supply[] updatedBelongings = new Supply[personalBelongings.length-1];
-        int index = 0;
-        int newIndex = index;
-        for (Supply supply : personalBelongings) {
-            if (!supply.equals(unwantedSupply)) {
-                updatedBelongings[newIndex] = supply;
-                newIndex++;
+        boolean atLocation = false;
+    
+        for (Supply temp : location.getSupplies()) {
+            if (temp.getType() == supply.getType() && temp.getQuantity() >= supply.getQuantity()) {
+                temp.removeQuantity(supply.getQuantity());
+                atLocation = true;
+                break;
             }
-            index++;
+        }
+    
+        if (atLocation) {
+            boolean inBelongings = false;
+
+            for (Supply temp : personalBelongings) {
+                if (temp.getType() == supply.getType()) {
+                    temp.addQuantity(supply.getQuantity());
+                    inBelongings = true;
+                    break;
+                }
+            }
+    
+            if (!inBelongings) {
+                Supply[] updatedBelongings = Arrays.copyOf(personalBelongings, personalBelongings.length + 1);
+                updatedBelongings[personalBelongings.length] = supply;
+                this.setPersonalBelongings(updatedBelongings);
+            }
+        } else {
+            throw new IllegalArgumentException("There are not enough supplies at victim's location to give out.");
+        }
+    }
+    
+    public void removePersonalBelonging(Supply unwantedSupply) {
+        boolean supplyRemoved = false;
+        boolean supplyUpdated = false;
+        int removedQuantity = 0;
+    
+        for (int i = 0; i < personalBelongings.length; i++) {
+            if (personalBelongings[i].getType() == unwantedSupply.getType()) {
+                int availableQuantity = personalBelongings[i].getQuantity();
+                if (availableQuantity >= unwantedSupply.getQuantity()) {
+                    personalBelongings[i].removeQuantity(unwantedSupply.getQuantity());
+                    removedQuantity = unwantedSupply.getQuantity();
+                    supplyRemoved = true;
+                    if (availableQuantity == unwantedSupply.getQuantity()) {
+                        personalBelongings[i] = null;
+                    }
+                } else {
+                    throw new IllegalArgumentException("Not enough quantity of the supply to remove.");
+                }
+                break;
+            }
+        }
+    
+        if (supplyRemoved) {
+            victimLocation.addSupply(unwantedSupply.getType(), removedQuantity);
+        }
+    
+        if (!supplyRemoved) {
+            if (!victimLocation.hasSupply(unwantedSupply.getType())) {
+                victimLocation.addSupply(unwantedSupply);
+            }
+        }
+    
+        if (!supplyRemoved && !supplyUpdated) {
+            throw new IllegalArgumentException("The supply you want to remove is not in this person's belongings");
+        }
+    }
+    
+    public void addFamilyConnection(FamilyRelation familyRelation) {
+
+        DisasterVictim personOne = familyRelation.getPersonOne();
+        DisasterVictim personTwo = familyRelation.getPersonTwo();
+    
+        boolean exists = false;
+        for (FamilyRelation relation : personOne.getFamilyConnections()) {
+            if (relation.getPersonTwo().equals(personTwo)) {
+                exists = true;
+                break;
+            }
+        }
+    
+        if (!exists) {
+            personOne.addConnection(familyRelation);
+        }
+    
+        exists = false;
+        for (FamilyRelation relation : personTwo.getFamilyConnections()) {
+            if (relation.getPersonTwo().equals(personOne)) {
+                exists = true;
+                break;
+            }
+        }
+    
+        if (!exists) {
+            FamilyRelation inverseRelation = new FamilyRelation(personTwo, familyRelation.getRelationshipTo(), personOne);
+            personTwo.addConnection(inverseRelation);
         }
     }
 
     public void removeFamilyConnection(FamilyRelation exRelation) {
-        familyConnections.remove(exRelation);
-    }
-
-    public void addFamilyConnection(FamilyRelation record) {
-        familyConnections.add(record);
-    }
-
-    public void addFamilyConnection(FamilyRelation relationship) {
-
-        DisasterVictim personOne = relationship.getPersonOne();
-        DisasterVictim personTwo = relationship.getPersonTwo();
+        DisasterVictim personOne = exRelation.getPersonOne();
+        DisasterVictim personTwo = exRelation.getPersonTwo();
+        FamilyRelation inverseRelation = relationFlipper(exRelation);
     
-
-        if (personOne.getFamilyConnections().contains(relationship) ||
-            personTwo.getFamilyConnections().contains(relationship)) {
-            throw new IllegalArgumentException("Duplicate relationship detected.");
+        if (!personOne.containsConnection(exRelation) || !personTwo.containsConnection(inverseRelation)) {
+            throw new IllegalArgumentException("The specified family connection does not exist.");
         }
     
-
-        personOne.familyConnections.add(relationship);
-        personTwo.familyConnections.add(relationship);
+        personOne.removeConnection(exRelation);
+        personTwo.removeConnection(inverseRelation);
+    }
     
-
-        for (FamilyRelation existingRelation : personOne.getFamilyConnections()) {
-            DisasterVictim otherPersonOne = existingRelation.getPersonOne();
-            DisasterVictim otherPersonTwo = existingRelation.getPersonTwo();
-            if ((otherPersonOne.equals(personOne) && !otherPersonTwo.equals(personTwo)) ||
-                (!otherPersonOne.equals(personOne) && otherPersonTwo.equals(personTwo))) {
-                addFamilyConnection(new FamilyRelation(otherPersonOne, personTwo));
+    public FamilyRelation relationFlipper(FamilyRelation relation) {
+        DisasterVictim personOne = relation.getPersonOne();
+        DisasterVictim personTwo = relation.getPersonTwo();
+        String relationshipTo = relation.getRelationshipTo();
+    
+        String inverseRelationship;
+        switch (relationshipTo.toLowerCase()) {
+            case "parent":
+                inverseRelationship = "child";
                 break;
-            }
+            case "child":
+                inverseRelationship = "parent";
+                break;
+            case "sibling":
+                inverseRelationship = "sibling";
+                break;
+            default:
+                inverseRelationship = relationshipTo;
+                break;
         }
+    
+        return new FamilyRelation(personTwo, inverseRelationship, personOne);
     }
     
     public void addMedicalRecord(MedicalRecord record) {
