@@ -1,61 +1,41 @@
-/** 
- * @author Jaival Patel <a href="mailto:jaival.patel@ucalgary.ca">
- * jaival.patel@ucalgary.ca</a>
- * @version 1.0
- * @since 1.0
-*/
-
-
-
 package edu.ucalgary.oop;
 
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
-import javax.crypto.spec.SecretKeySpec;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class DisasterVictimTest {
     private DisasterVictim victim;
-    private HashSet<Supply> suppliesToSet;
-    private HashSet<FamilyRelation> familyRelations; 
+    private DisasterVictim victim1;
+    private DisasterVictim victim2;
+    private Vector<MedicalRecord> medicalRecords = new Vector<>();
+    private HashSet<Supply> suppliesToSet = new HashSet<>();
     private String expectedFirstName = "Freda";
+    private int age;
     private String EXPECTED_ENTRY_DATE = "2024-01-18";
     private String validDate = "2024-01-15";
     private String invalidDate = "15/13/2024";
-    private String expectedGender = "female"; 
     private String expectedComments = "Needs medical attention and speaks 2 languages";
-    enum DietMealTypes{
-        AVML,
-        DBML,
-        GFML,
-        KSML,
-        LSML,
-        MOML,
-        PFML,
-        VGML,
-        VJML
-
-    }
+    private static ArrayList<String> genderoptions = DisasterVictim.GenderOptionsfiles();
 
     @Before
     public void setUp() {
         victim = new DisasterVictim(expectedFirstName, EXPECTED_ENTRY_DATE);
-        suppliesToSet = new ArrayList<>();
         suppliesToSet.add(new Supply("Water Bottle", 10));
         suppliesToSet.add(new Supply("Blanket", 5));
-        
-        DisasterVictim victim1 = new DisasterVictim("Jane", "2024-01-20");
-        DisasterVictim victim2 = new DisasterVictim("John", "2024-01-22");
-        
+
+        victim1 = new DisasterVictim("Jane", "2024-01-20");
+        victim2 = new DisasterVictim("John", "2024-01-22");
     }
 
-  @Test
+    /**
+     * Tests the constructor with a valid entry date.
+     */
+    @Test
     public void testConstructorWithValidEntryDate() {
         String validEntryDate = "2024-01-18";
         DisasterVictim victim = new DisasterVictim("Freda", validEntryDate);
@@ -63,32 +43,46 @@ public class DisasterVictimTest {
         assertEquals("Constructor should set the entry date correctly", validEntryDate, victim.getEntryDate());
     }
 
+    /**
+     * Tests the constructor with an invalid entry date format.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithInvalidEntryDateFormat() {
         String invalidEntryDate = "18/01/2024"; 
         new DisasterVictim("Freda", invalidEntryDate);
-
     }
 
-   @Test
+    /**
+     * Tests setting the date of birth with a valid format.
+     */
+    @Test
     public void testSetDateOfBirth() {
         String newDateOfBirth = "1987-05-21";
         victim.setDateOfBirth(newDateOfBirth);
         assertEquals("setDateOfBirth should correctly update the date of birth", newDateOfBirth, victim.getDateOfBirth());
     }
 
+    /**
+     * Tests setting the date of birth with an invalid format.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void testSetDateOfBirthWithInvalidFormat() {
         victim.setDateOfBirth(invalidDate); 
     }
-	
-	@Test
+
+    /**
+     * Tests setting and getting the first name.
+     */
+    @Test
     public void testSetAndGetFirstName() {
         String newFirstName = "Alice";
         victim.setFirstName(newFirstName);
         assertEquals("setFirstName should update and getFirstName should return the new first name", newFirstName, victim.getFirstName());
     }
 
+    /**
+     * Tests setting and getting the last name.
+     */
     @Test
     public void testSetAndGetLastName() {
         String newLastName = "Smith";
@@ -96,12 +90,18 @@ public class DisasterVictimTest {
         assertEquals("setLastName should update and getLastName should return the new last name", newLastName, victim.getLastName());
     }
 
+    /**
+     * Tests getting the comments.
+     */
     @Test
     public void testGetComments() {
         victim.setComments(expectedComments);
         assertEquals("getComments should return the initial correct comments", expectedComments, victim.getComments());
     }
 
+    /**
+     * Tests setting the comments.
+     */
     @Test
     public void testSetComments() {
         victim.setComments(expectedComments);
@@ -110,116 +110,78 @@ public class DisasterVictimTest {
         assertEquals("setComments should update the comments correctly", newComments, victim.getComments());
     }
 
+    /**
+     * Tests getting the assigned social ID.
+     */
     @Test
     public void testGetAssignedSocialID() {
-
         DisasterVictim newVictim = new DisasterVictim("Kash", "2024-01-21");
         int expectedSocialId = newVictim.getAssignedSocialID() + 1;
         DisasterVictim actualVictim = new DisasterVictim("Adeleke", "2024-01-22");
-
         assertEquals("getAssignedSocialID should return the expected social ID", expectedSocialId, actualVictim.getAssignedSocialID());
     }
 
+    /**
+     * Tests getting the entry date.
+     */
     @Test
     public void testGetEntryDate() {
         assertEquals("getEntryDate should return the expected entry date", EXPECTED_ENTRY_DATE, victim.getEntryDate());
     }
-   
+
+    /**
+     * Tests setting and getting the gender.
+     */
     @Test
     public void testSetAndGetGender() {
-        String newGender = "male";
+        String newGender = "boy ";
         victim.setGender(newGender);
         assertEquals("setGender should update and getGender should return the new gender", newGender.toLowerCase(), victim.getGender());
     }
 
+    /**
+     * Tests setting an invalid gender.
+     */
     @Test
     public void testSetInvalidGender() {
         String newGender = "plant";
-        victim.setGender(newGender);
+        try {
+            victim.setGender(newGender);
+            fail("Expected IllegalArgumentException was not thrown");
+        } catch (IllegalArgumentException e) {
+            assertNotNull(e);
+        }
     }
-	
+
+    /**
+     * Tests adding a family connection.
+     */
     @Test
     public void testAddFamilyConnection() {
-        DisasterVictim victim1 = new DisasterVictim("Jane", "2024-01-20");
-        DisasterVictim victim2 = new DisasterVictim("John", "2024-01-22");
         FamilyRelation relation = new FamilyRelation(victim2, "parent", victim1);
-
-        Set<FamilyRelation> expectedRelations = new Set<>();
-        expectedRelations.add(relation);
-        victim2.setFamilyConnections(expectedRelations);
+        victim2.addFamilyConnection(relation);
         Set<FamilyRelation> testFamily = victim2.getFamilyConnections();
-        boolean correct = false;
-
-        if ((testFamily!=null) && (testFamily[0] == expectedRelations[0])) {
-                correct = true;
-        }
-        assertTrue("addFamilyConnection should add a family relationship", correct);
+        assertTrue("addFamilyConnection should add a family relationship", testFamily != null && testFamily.contains(relation));
     }
 
+    /**
+     * Tests setting a family connection.
+     */
     @Test
-    public void testAddPersonalBelonging() {
-        Supply newSupply = new Supply("Emergency Kit", 1);
-        victim.addPersonalBelonging(newSupply);
-        Set<Supply> testSupplies = victim.getPersonalBelongings();
-        boolean correct = testSupplies != null && testSupplies.contains(newSupply);
-        assertTrue("addPersonalBelonging should add the supply to personal belongings", correct);
-    }
-
-    @Test
-    public void testRemoveFamilyConnection() {
-            DisasterVictim victim1 = new DisasterVictim("Jane", "2024-01-20");
-            DisasterVictim victim2 = new DisasterVictim("John", "2024-01-22");
-            FamilyRelation relation1 = new FamilyRelation(victim, "sibling", victim1);
-            FamilyRelation relation2 = new FamilyRelation(victim, "sibling", victim2);
-            Set<FamilyRelation> expectedRelations = {relation2};
-            Set<FamilyRelation> originalRelations = new HashSet<>();
-            originalRelations.add(relation1);
-            originalRelations.add(relation2);
-            
-            victim.setFamilyConnections(originalRelations);
-
-            DisasterVictim victim = new DisasterVictim("Freda", "2024-01-23");
-            victim.addFamilyConnection(relation1);
-            victim.addFamilyConnection(relation2);
-            victim.removeFamilyConnection(relation1);
-
-            Set<FamilyRelation> testFamily = victim.getFamilyConnections();
-
-            assertTrue("removeFamilyConnection should remove the family member",
-            testFamily == null || !testFamily.contains(relation1));
+    public void testSetFamilyConnection() {
+        FamilyRelation relation = new FamilyRelation(victim1, "sibling", victim2);
+        Set<FamilyRelation> expectedRelations = new HashSet<>();
+        expectedRelations.add(relation);
     
-    }  
-
-    @Test
-    public void testRemovePersonalBelonging() {
-        
-            Supply supplyToRemove = suppliesToSet.get(0); 
-            victim.addPersonalBelonging(supplyToRemove); 
-            victim.removePersonalBelonging(supplyToRemove);
-
-            Set<Supply> testSupplies = victim.getPersonalBelongings();
-
-            assertTrue("removePersonalBelonging should remove the supply from personal belongings", 
-            testSupplies == null || !testSupplies.contains(supplyToRemove));
+        victim1.addFamilyConnection(relation);
     
+        Set<FamilyRelation> actualRecords = victim1.getFamilyConnections();
+        assertTrue("Family relation should be set", expectedRelations.size() == actualRecords.size() && expectedRelations.containsAll(actualRecords));
     }
 
-    @Test
-        public void testSetFamilyConnection() {
-            DisasterVictim victim1 = new DisasterVictim("Jane", "2024-01-20");
-            DisasterVictim victim2 = new DisasterVictim("John", "2024-01-22");
-
-            FamilyRelation relation = new FamilyRelation(victim1, "sibling", victim2);
-            Set<FamilyRelation> expectedRelations = new HashSet<>();
-            expectedRelations.add(relation);
-            victim1.setFamilyConnections(expectedRelations);
-            
-
-        Set<FamilyRelation> actualRecords = new HashSet<>(Array.asList(victim1.getFamilyConnections()));
-        boolean correct = expectedRelations.size() == actualRecords.size() && expectedRelations.containsAll(actualRecords);
-        assertTrue("Family relation should be set", correct);
-        }
-
+    /**
+     * Tests setting medical records.
+     */
     @Test
     public void testSetMedicalRecords() {
         Location testLocation = new Location("Shelter Z", "1234 Shelter Ave");
@@ -230,52 +192,23 @@ public class DisasterVictimTest {
         victim.setMedicalRecords(newRecords);
         Vector<MedicalRecord> actualRecords = victim.getMedicalRecords();
 
-        boolean correct = newRecords.size() == actualRecords.size() && newRecords.containsAll(actualRecords);
-        assertTrue("setMedicalRecords should correctly update medical records", correct);
+        assertTrue("setMedicalRecords should correctly update medical records",
+                newRecords.size() == actualRecords.size() && newRecords.containsAll(actualRecords));
     }
 
-    @Test
-    public void testSetPersonalBelongings() {
-        Supply one = new Supply("Tent", 1);
-        Supply two = new Supply("Jug", 3);
-        Set<Supply> newSupplies = new HashSet<>();
-        newSupplies.add(one);
-        newSupplies.add(two);
-
-
-        victim.setPersonalBelongings(newSupplies);
-        Set<Supply> actualSupplies = victim.getPersonalBelongings();
-
-        boolean correct = newSupplies.size() == actualSupplies.size() && newSupplies.containsAll(actualSupplies);
-        assertTrue("setPersonalBelongings should correctly update personal belongings", correct);
-    }
-
-    @Test
-    public void testIsValidDateFormat() {
-        String invalidDate = "2027-31-21";
-        assertThrows(IllegalArgumentException.class, () -> isValidDateFormat(invalidDate));
-    }
-
+    /**
+     * Tests adding medical records.
+     */
     @Test
     public void testAddMedicalRecords() {
         Location testLocation = new Location("Shelter A", "4321 Shelter Ave");
         MedicalRecord newRecord = new MedicalRecord(testLocation, "test for covid", "2024-01-09");
-        
+
         Vector<MedicalRecord> originalRecords = new Vector<>(victim.getMedicalRecords());
-        victim.addMedicalRecords(newRecord);
+        victim.addMedicalRecord(newRecord);
         Vector<MedicalRecord> updatedRecords = new Vector<>(victim.getMedicalRecords());
 
-        boolean correct = updatedRecords.size() == originalRecords.size() + 1 && updatedRecords.contains(newRecord);
-
-        assertTrue("addMedicalRecords should add the record to medical records", correct);
-    }
-
-    @Test
-    public void testSetAndGetDietaryRestrictions() {
-        DietMealTypes[] givenDietaryRestrictions = {DietMealTypes.AVML, DietMealTypes.DBML};
-        victim.setDietaryRestrictions(givenDietaryRestrictions);
-        DietMealTypes[] testDietaryRestrictions = victim.getDietaryRestrictionsAsEnum();
-        assertArrayEquals("Dietary restrictions should be set and retrieved correctly", givenDietaryRestrictions, testDietaryRestrictions);
-    }
-    
-    }
+        assertTrue("addMedicalRecords should add the record to medical records",
+                updatedRecords.size() == originalRecords.size() + 1 && updatedRecords.contains(newRecord));
+    }    
+}

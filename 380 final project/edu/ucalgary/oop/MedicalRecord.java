@@ -1,10 +1,3 @@
-/** 
- * @author Jaival Patel <a href="mailto:jaival.patel@ucalgary.ca">
- * jaival.patel@ucalgary.ca</a>
- * @version 1.0
- * @since 1.0
-*/
-
 package edu.ucalgary.oop;
 
 import java.time.LocalDate;
@@ -25,26 +18,50 @@ public class MedicalRecord {
         this.dateOfTreatment = dateOfTreatment;
     }
 
+    /**
+     * Retrieves the location where the treatment took place.
+     * @return The location where the treatment took place.
+     */
     public Location getLocation() {
         return location;
     }
 
+    /**
+     * Retrieves the details of the medical treatment.
+     * @return Details of the medical treatment.
+     */
     public String getTreatmentDetails() {
         return treatmentDetails;
     }
 
+    /**
+     * Retrieves the date of the medical treatment.
+     * @return The date of the medical treatment in the format "YYYY-MM-DD".
+     */
     public String getDateOfTreatment() {
         return dateOfTreatment;
     }
 
+    /**
+     * Sets the location where the treatment took place.
+     * @param location The location where the treatment took place.
+     */
     public void setLocation(Location location) {
         this.location = location;
     }
 
+    /**
+     * Sets the details of the medical treatment.
+     * @param treatmentDetails Details of the medical treatment.
+     * @throws IllegalArgumentException If the treatment details are invalid.
+     */
     public void setTreatmentDetails(String treatmentDetails) throws IllegalArgumentException {
         this.treatmentDetails = treatmentDetails;
     }
 
+    /**
+     * Sets the date of the medical treatment.
+     */
     public void setDateOfTreatment(String dateOfTreatment) throws IllegalArgumentException {
 
         if (!isValidDateFormat(dateOfTreatment)) {
@@ -53,6 +70,9 @@ public class MedicalRecord {
         this.dateOfTreatment = dateOfTreatment;
     }
 
+    /**
+     * Checks if the provided date string has a valid format.
+     */
     private boolean isValidDateFormat(String date) {
         try {
             LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
@@ -62,4 +82,3 @@ public class MedicalRecord {
         }
     }
 }
-
