@@ -163,7 +163,7 @@ public class DisasterVictim {
         this.medicalRecords = medicalRecord;
     }
     
-    public void setPersonalBelongings(Supply[] updatedBelongings) {
+    public void setPersonalBelongings(Set<Supply> newSupplies) {
         if (!this.personalBelongings.isEmpty()) {
             this.personalBelongings.clear();
         }
